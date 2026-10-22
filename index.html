@@ -72,6 +72,7 @@ h2{font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:upperca
 .stepper{display:grid; grid-template-columns:64px minmax(0,1fr) 64px; gap:8px}
 .step{border:1px solid var(--line); background:var(--surface); border-radius:12px; font-size:26px; min-height:56px}
 .step:active{background:var(--surface2)}
+textarea{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:14px; min-width:0; resize:vertical}
 input[type=text],input[type=date],input:not([type]),select{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:0 14px; min-height:52px; font-size:17px; min-width:0}
 .stepper input{text-align:center; font-family:var(--font-display); font-weight:700; font-size:28px}
 .money{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:0 14px}
@@ -229,6 +230,7 @@ details[open] summary::before{content:"− "}
 <script>
 (function(){
 'use strict';
+var FILEBK='<button class="btn ghost" style="margin-top:8px" data-act="bk-export">Baixar arquivo de backup</button><label class="btn ghost" style="display:flex;align-items:center;justify-content:center;margin-top:8px">Importar arquivo<input type="file" accept="application/json,.json" data-ch="bk-file" hidden></label>';
 
 /* ---------- estado ---------- */
 var LS='plaquinhas-nfc-v1';
@@ -243,7 +245,7 @@ var newOpen=false, editGoal=null;
 var dayCols=[], selDay=13, tipTimer=null;
 var salesQ='', salesPeriod='month', salesPay='all', salesFrom='', salesTo='', salesLimit=40, openSale=null;
 var sim={type:'unidades',mode:'total',pid:'all',target:'',period:'month',perDay:null,price:null};
-var curP='all', editProd=null, prodName='', openDD=null, openStock=null;
+var curP='all', editProd=null, prodName='', openDD=null, openStock=null, bkText='';
 
 function normalize(x){
   var d=DEF(), s=Object.assign({},d.settings,(x&&x.settings)||{});
@@ -727,6 +729,13 @@ function render(){
   if(tab==='stock')updateLotHint();
   var dl=document.querySelector('.ddl');if(dl&&dl.getBoundingClientRect){var rr=dl.getBoundingClientRect();if(rr.bottom>(window.innerHeight||800)-72)dl.classList.add('up');}
 }
+function backupSection(){
+  var arm=armed==='bk-imp';
+  return '<section class="sec"><h2>Backup</h2><p class="note" style="margin:0 0 12px">Para levar seus dados para outro aparelho ou app: toque em Gerar backup, copie o texto e cole no outro lugar, em Importar.</p>'+
+    '<button class="btn" data-act="bk-gen">Gerar backup</button>'+
+    '<div class="field" style="margin-top:12px"><label for="bk-text">Texto do backup</label><textarea id="bk-text" data-in="bktext" rows="5" placeholder="O backup aparece aqui. Para importar, cole o texto aqui.">'+esc(bkText)+'</textarea></div>'+
+    '<button class="btn ghost"'+(arm?' style="border-color:var(--neg);color:var(--neg)"':'')+' data-act="bk-imp">'+(arm?'Confirmar: substituir meus dados?':'Importar do texto')+'</button>'+(typeof FILEBK==='string'?FILEBK:'')+'</section>';
+}
 function viewProd(){
   var h='<section class="sec"><h1>Produtos</h1><div class="field"><label for="p-new">'+(editProd?'Renomear produto':'Novo produto')+'</label><input id="p-new" type="text" data-in="prodname" value="'+esc(prodName)+'" placeholder="Ex.: Camiseta" autocomplete="off"></div>'+
     (editProd?'<button class="btn primary" data-act="prod-save">Salvar nome</button><button class="btn ghost" data-act="prod-cancel">Cancelar</button>':'<button class="btn primary" data-act="prod-add">Cadastrar produto</button>')+'</section>';
@@ -737,9 +746,7 @@ function viewProd(){
     return '<div class="item"><div class="l"><b>'+esc(p.name)+'</b><span class="sub">Estoque '+int(Math.max(0,st.avail))+' un'+(st.transitQty?' · a caminho '+int(st.transitQty):'')+'</span><span class="sub">Custo médio '+(st.avg>0?brl(st.avg):'–')+'</span></div>'+
       '<div class="r"><b class="num">'+brl(a.rev)+'</b><span class="sub '+(a.profit<0?'neg':'pos')+'">líquido '+brl(a.profit)+'</span>'+
       '<div class="acts">'+btnEdit('prod-edit',p.id)+btnDel('prod-del',p.id,arm)+'</div></div></div>';}).join('')+'</div></section>';
-  h+='<section class="sec"><h2>Backup</h2><p class="note" style="margin:0 0 12px">Seus dados ficam salvos só neste aparelho. Exporte um backup de vez em quando, e use Importar para levar os dados para outro aparelho.</p>'+
-    '<button class="btn" data-act="bk-export">Exportar backup</button>'+
-    '<label class="btn ghost" style="display:flex;align-items:center;justify-content:center;margin-top:8px">Importar backup<input type="file" accept="application/json,.json" data-ch="bk-file" hidden></label></section>';
+  h+=backupSection();
   return h;
 }
 function resetDraft(){
@@ -920,6 +927,23 @@ function placeTip(i){
 /* ---------- ações ---------- */
 var ACTS={
   tab:function(b){goTab(b.dataset.t);},
+  'bk-gen':function(){
+    bkText=JSON.stringify(normalize(S));
+    try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(bkText).catch(function(){});}catch(e){}
+    render();
+    var ta=document.getElementById('bk-text');if(ta){try{ta.focus();ta.select();}catch(e){}}
+    toast('Backup gerado. Copie o texto.');
+  },
+  'bk-imp':function(){
+    if(armed!=='bk-imp'){
+      if(!bkText.trim()){toast('Cole o texto do backup no campo');return;}
+      armed='bk-imp';render();setTimeout(function(){if(armed==='bk-imp'){armed=null;render();}},4000);return;
+    }
+    try{
+      var d=JSON.parse(bkText),n=normalize(d&&d.state?d.state:d);
+      S=n;armed=null;bkText='';resetDraft();touch();render();toast('Dados importados');
+    }catch(e){armed=null;render();toast('Texto de backup inválido');}
+  },
   'bk-export':function(){
     var blob=new Blob([JSON.stringify(normalize(S))],{type:'application/json'}),a=document.createElement('a');
     a.href=URL.createObjectURL(blob);a.download='crm-backup-'+ymd(new Date())+'.json';document.body.appendChild(a);a.click();
@@ -1028,6 +1052,7 @@ var ACTS={
   }
 };
 var INS={
+  bktext:function(t){bkText=t.value;},
   prodname:function(t){prodName=t.value;},
   qty:function(t){draft.qty=t.value.replace(/\D/g,'');updateSellUI();},
   price:function(t){draft.price=t.value;updateSellUI();},
