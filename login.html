@@ -216,12 +216,16 @@ body.boot .top,body.boot main,body.boot .nav{visibility:hidden}
 .lw{min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; justify-content:center; max-width:420px; margin:0 auto; padding:24px 0}
 .lbrand{text-align:center; margin-bottom:26px}
 .lbrand img{width:72px; height:72px; border-radius:18px}
-.lbrand h1{margin:14px 0 4px}
+.lbrand h1{margin:14px 0 0}
+.lt{font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; text-transform:none; color:var(--fg)}
+.lk{background:none; border:0; color:var(--accent); font-weight:600; font-size:15px; padding:8px 4px; min-height:44px}
+.lrow{text-align:center; margin-top:10px; color:var(--muted); font-size:15px}
+.lsep{height:1px; background:var(--line); margin:18px 0 8px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 </head>
 <body>
-<main class="lw"><div class="lbrand"><img src="icon-192.png" alt=""><h1>CRM</h1><p id="sub" class="note" style="margin:0"></p></div><div id="box"></div></main>
+<main class="lw"><div class="lbrand"><img src="icon-192.png" alt=""><h1>CRM</h1></div><div id="box"></div></main>
 <script>(function(){
 'use strict';
 var URL_='https://iuqklnlszqmwsseratqb.supabase.co',KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cWtsbmxzenFtd3NzZXJhdHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MDcxMzUsImV4cCI6MjEwODI4MzEzNX0.VMNTN5BF3XOHT0_LH35Sut0Miffo6KhuvNwmp2ydjxw';
@@ -241,21 +245,35 @@ function authErr(m){m=String(m||'');
 }
 function msg(t,bad){var el=$('#auth-msg');if(el){el.textContent=t||'';el.className='note'+(bad?' neg':'');}}
 function go(){location.replace('./');}
+var mode=recovering?'recovery':'login',pass2='';
+function field(id,label,type,key,val,auto){return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+type+'" '+(type==='email'?'inputmode="email" autocapitalize="none" ':'')+'autocomplete="'+auto+'" data-in="'+key+'" value="'+esc(val)+'"></div>';}
 function render(){
-  var h='';
-  if(recovering){
-    $('#sub').textContent='Defina uma nova senha.';
-    h='<div class="field"><label for="a-new">Nova senha</label><input id="a-new" type="password" autocomplete="new-password" data-in="new" value="'+esc(newp)+'"></div><p id="auth-msg" class="note"></p><button class="btn primary" data-act="newpass">Salvar senha</button>';
+  var T={login:'Entrar',signup:'Criar conta',reset:'Recuperar senha',recovery:'Nova senha'}[mode];
+  var S_={login:'Entre para ver os seus dados.',signup:'Use um e-mail e crie uma senha.',reset:'Enviaremos um link para o seu e-mail.',recovery:'Defina uma nova senha.'}[mode];
+  var h='<h2 class="lt">'+T+'</h2><p class="note" style="margin:0 0 16px">'+S_+'</p>';
+  if(mode==='login'){
+    h+=field('a-email','E-mail','email','email',email,'email')+field('a-pass','Senha','password','pass',pass,'current-password')+'<p id="auth-msg" class="note"></p>'+
+      '<button class="btn primary" data-act="login">Entrar</button>'+
+      '<div class="lrow"><button class="lk" data-act="to-reset">Esqueci a senha</button></div>'+
+      '<div class="lsep"></div><div class="lrow">Ainda não tem conta? <button class="lk" data-act="to-signup">Criar conta</button></div>';
+  }else if(mode==='signup'){
+    h+=field('a-email','E-mail','email','email',email,'email')+field('a-pass','Senha (mínimo 6 caracteres)','password','pass',pass,'new-password')+field('a-pass2','Repita a senha','password','pass2',pass2,'new-password')+'<p id="auth-msg" class="note"></p>'+
+      '<button class="btn primary" data-act="signup">Criar conta</button>'+
+      '<div class="lsep"></div><div class="lrow">Já tem conta? <button class="lk" data-act="to-login">Entrar</button></div>';
+  }else if(mode==='reset'){
+    h+=field('a-email','E-mail','email','email',email,'email')+'<p id="auth-msg" class="note"></p>'+
+      '<button class="btn primary" data-act="reset">Enviar link</button>'+
+      '<div class="lsep"></div><div class="lrow"><button class="lk" data-act="to-login">Voltar para entrar</button></div>';
   }else{
-    $('#sub').textContent='Entre para ver os seus dados.';
-    h='<div class="field"><label for="a-email">E-mail</label><input id="a-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" data-in="email" value="'+esc(email)+'"></div>'+
-      '<div class="field"><label for="a-pass">Senha</label><input id="a-pass" type="password" autocomplete="current-password" data-in="pass" value="'+esc(pass)+'"></div><p id="auth-msg" class="note"></p>'+
-      '<button class="btn primary" data-act="login">Entrar</button><button class="btn ghost" data-act="signup">Criar conta</button><button class="btn ghost" data-act="reset">Esqueci a senha</button>';
+    h+=field('a-new','Nova senha','password','new',newp,'new-password')+'<p id="auth-msg" class="note"></p><button class="btn primary" data-act="newpass">Salvar senha</button>';
   }
   $('#box').innerHTML=h;
   if(!sb)msg('Sem conexão com o servidor. Abra com internet.',true);
 }
 var ACT={
+  'to-login':function(){mode='login';render();},
+  'to-signup':function(){mode='signup';render();},
+  'to-reset':function(){mode='reset';render();},
   login:function(){
     var e=email.trim();
     if(!sb){msg('Sem conexão com o servidor.',true);return;}
@@ -271,17 +289,18 @@ var ACT={
     if(!sb){msg('Sem conexão com o servidor.',true);return;}
     if(!e||!pass){msg('Digite e-mail e senha.',true);return;}
     if(pass.length<6){msg('A senha precisa de pelo menos 6 caracteres.',true);return;}
+    if(pass!==pass2){msg('As senhas não são iguais.',true);return;}
     msg('Criando conta…');
     sb.auth.signUp({email:e,password:pass,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
       if(r.error){msg(authErr(r.error.message),true);return;}
       if(r.data&&r.data.session){go();}
-      else msg('Conta criada. Confirme o e-mail que enviamos e depois toque em Entrar.');
+      else{mode='login';render();msg('Conta criada. Confirme o e-mail que enviamos e depois entre.');}
     },function(){msg('Sem conexão. Tente de novo.',true);});
   },
   reset:function(){
     var e=email.trim();
     if(!sb)return;
-    if(!e){msg('Digite seu e-mail primeiro.',true);return;}
+    if(!e){msg('Digite seu e-mail.',true);return;}
     sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){
       msg(r.error?authErr(r.error.message):'Se esse e-mail tem conta, enviamos um link para redefinir a senha.',!!r.error);
     },function(){msg('Sem conexão. Tente de novo.',true);});
@@ -295,11 +314,11 @@ var ACT={
   }
 };
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act]');if(b&&ACT[b.dataset.act])ACT[b.dataset.act]();});
-document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.in;if(k==='email')email=e.target.value;else if(k==='pass')pass=e.target.value;else if(k==='new')newp=e.target.value;});
-document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT'){if(recovering)ACT.newpass();else ACT.login();}});
+document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.in;if(k==='email')email=e.target.value;else if(k==='pass')pass=e.target.value;else if(k==='pass2')pass2=e.target.value;else if(k==='new')newp=e.target.value;});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT'){ACT[{login:'login',signup:'signup',reset:'reset',recovery:'newpass'}[mode]]();}});
 if(!sb){render();}
 else{
-  sb.auth.onAuthStateChange(function(ev){if(ev==='PASSWORD_RECOVERY'){recovering=true;setTimeout(render,0);}});
+  sb.auth.onAuthStateChange(function(ev){if(ev==='PASSWORD_RECOVERY'){recovering=true;mode='recovery';setTimeout(render,0);}});
   sb.auth.getSession().then(function(r){if(r.data&&r.data.session&&!recovering)go();else render();},function(){render();});
 }
 })();
