@@ -248,6 +248,32 @@ input[type=date]{-webkit-appearance:none; appearance:none; display:block; width:
 input[type=date]::-webkit-date-and-time-value{text-align:left; margin:0; min-height:1.2em}
 input[type=date]::-webkit-datetime-edit{padding:0}
 input[type=date]::-webkit-calendar-picker-indicator{opacity:.6}
+.pth{width:56px; height:56px; border-radius:14px; background:var(--surface2); display:grid; place-items:center; overflow:hidden; flex:none; color:var(--muted); font-family:var(--font-display); font-weight:700; font-size:20px}
+.pth img{width:100%; height:100%; object-fit:cover; display:block}
+.pth.lg{width:84px; height:84px; border-radius:20px; font-size:30px}
+.pth.sm{width:40px; height:40px; border-radius:10px; font-size:16px}
+.pform{display:flex; align-items:flex-end; gap:14px}
+.pimg{width:84px; height:84px; flex:none; border-radius:20px; border:1px dashed var(--line); background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; overflow:hidden; color:var(--muted); cursor:pointer}
+.pimg img{width:100%; height:100%; object-fit:cover}
+.pimg svg{width:26px; height:26px}
+.pimg small{font-size:12px; font-weight:600}
+.vh{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none}
+.dhead{display:flex; align-items:center; gap:16px}
+.fchips{display:flex; gap:8px; overflow-x:auto; margin:0 0 6px; padding-bottom:4px}
+.fchips button{flex:none; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:9px 14px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--muted); min-width:84px; text-align:left}
+.fchips button b{font-size:13px; font-weight:600}
+.fchips button span{font-family:var(--font-display); font-size:17px; font-weight:700; color:var(--fg)}
+.fchips button[aria-pressed="true"]{background:var(--fg); border-color:var(--fg); color:var(--bg)}
+.fchips button[aria-pressed="true"] span{color:var(--bg)}
+.srows{display:flex; flex-direction:column}
+.srow{display:flex; align-items:center; gap:14px; width:100%; padding:14px 0; background:none; border:0; border-top:1px solid var(--line); text-align:left; color:var(--fg)}
+.srow:first-child{border-top:0}
+.srow .sm{flex:1; min-width:0; display:flex; flex-direction:column; gap:3px}
+.srow .sm b{font-size:16px; overflow-wrap:anywhere}
+.srow .sr{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:none}
+.srow .sn{font-family:var(--font-display); font-size:19px; font-weight:700; font-variant-numeric:tabular-nums}
+.chipw.neg{color:var(--neg)}
+.btn svg{width:20px; height:20px; flex:none}
 #wiz[hidden]{display:none}
 #wiz{position:fixed; inset:0; z-index:11; background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch}
 body.wizopen{overflow:hidden}
