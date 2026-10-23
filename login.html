@@ -210,7 +210,17 @@ details[open] summary::before{content:"− "}
 .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(84px + env(safe-area-inset-bottom, 0px)); background:var(--fg); color:var(--bg); padding:10px 16px; border-radius:99px; font-weight:600; font-size:14px; z-index:12; max-width:calc(100vw - 32px); text-align:center}
 @media (prefers-reduced-motion:no-preference){ .prog i{transition:width .3s ease} }
 body.auth .nav{display:none}
-input[type=password],input[type=email]{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:0 14px; min-height:52px; font-size:17px; min-width:0}
+input[type=password],input[type=email],input[type=tel]{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:0 14px; min-height:52px; font-size:17px; min-width:0}
+body{padding-top:env(safe-area-inset-top,0px)}
+.hr{display:flex; align-items:center; gap:10px}
+.avatar{width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:var(--surface2); color:var(--fg); font-weight:700; font-size:14px; display:grid; place-items:center; padding:0; flex:none}
+.avatar[aria-current="page"]{border-color:var(--accent); color:var(--accent)}
+.kpis{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.kpi{border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:14px}
+.kpi b{display:block; font-family:var(--font-display); font-size:26px; letter-spacing:-.02em}
+.kpi span{color:var(--muted); font-size:13px}
+.fbta{font-size:16px; min-height:104px}
+.btn.danger-b{border-color:var(--neg); color:var(--neg)}
 body.boot .top,body.boot main,body.boot .nav{visibility:hidden}
 
 .lw{min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; justify-content:center; max-width:420px; margin:0 auto; padding:24px 0}
@@ -229,7 +239,7 @@ body.boot .top,body.boot main,body.boot .nav{visibility:hidden}
 <script>(function(){
 'use strict';
 var URL_='https://iuqklnlszqmwsseratqb.supabase.co',KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cWtsbmxzenFtd3NzZXJhdHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MDcxMzUsImV4cCI6MjEwODI4MzEzNX0.VMNTN5BF3XOHT0_LH35Sut0Miffo6KhuvNwmp2ydjxw';
-var sb=null,recovering=/type=recovery/.test(location.hash||''),email='',pass='',newp='',busy=false;
+var sb=null,recovering=/type=recovery/.test(location.hash||''),email='',pass='',newp='',busy=false,nome='',wapp='';
 try{sb=window.supabase.createClient(URL_,KEY_,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});}catch(e){sb=null;}
 function $(s){return document.querySelector(s);}
 function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -246,10 +256,10 @@ function authErr(m){m=String(m||'');
 function msg(t,bad){var el=$('#auth-msg');if(el){el.textContent=t||'';el.className='note'+(bad?' neg':'');}}
 function go(){location.replace('./');}
 var mode=recovering?'recovery':'login',pass2='';
-function field(id,label,type,key,val,auto){return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+type+'" '+(type==='email'?'inputmode="email" autocapitalize="none" ':'')+'autocomplete="'+auto+'" data-in="'+key+'" value="'+esc(val)+'"></div>';}
+function field(id,label,type,key,val,auto){return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+type+'" '+(type==='email'?'inputmode="email" autocapitalize="none" ':type==='tel'?'inputmode="tel" placeholder="(11) 99999-9999" ':'')+'autocomplete="'+auto+'" data-in="'+key+'" value="'+esc(val)+'"></div>';}
 function render(){
   var T={login:'Entrar',signup:'Criar conta',reset:'Recuperar senha',recovery:'Nova senha'}[mode];
-  var S_={login:'Entre para ver os seus dados.',signup:'Use um e-mail e crie uma senha.',reset:'Enviaremos um link para o seu e-mail.',recovery:'Defina uma nova senha.'}[mode];
+  var S_={login:'Entre para ver os seus dados.',signup:'Preencha seus dados para criar a conta.',reset:'Enviaremos um link para o seu e-mail.',recovery:'Defina uma nova senha.'}[mode];
   var h='<h2 class="lt">'+T+'</h2><p class="note" style="margin:0 0 16px">'+S_+'</p>';
   if(mode==='login'){
     h+=field('a-email','E-mail','email','email',email,'email')+field('a-pass','Senha','password','pass',pass,'current-password')+'<p id="auth-msg" class="note"></p>'+
@@ -257,7 +267,7 @@ function render(){
       '<div class="lrow"><button class="lk" data-act="to-reset">Esqueci a senha</button></div>'+
       '<div class="lsep"></div><div class="lrow">Ainda não tem conta? <button class="lk" data-act="to-signup">Criar conta</button></div>';
   }else if(mode==='signup'){
-    h+=field('a-email','E-mail','email','email',email,'email')+field('a-pass','Senha (mínimo 6 caracteres)','password','pass',pass,'new-password')+field('a-pass2','Repita a senha','password','pass2',pass2,'new-password')+'<p id="auth-msg" class="note"></p>'+
+    h+=field('a-nome','Nome','text','nome',nome,'name')+field('a-wapp','WhatsApp','tel','wapp',wapp,'tel')+field('a-email','E-mail','email','email',email,'email')+field('a-pass','Senha (mínimo 6 caracteres)','password','pass',pass,'new-password')+field('a-pass2','Repita a senha','password','pass2',pass2,'new-password')+'<p id="auth-msg" class="note"></p>'+
       '<button class="btn primary" data-act="signup">Criar conta</button>'+
       '<div class="lsep"></div><div class="lrow">Já tem conta? <button class="lk" data-act="to-login">Entrar</button></div>';
   }else if(mode==='reset'){
@@ -285,13 +295,15 @@ var ACT={
     },function(){msg('Sem conexão. Tente de novo.',true);});
   },
   signup:function(){
-    var e=email.trim();
+    var e=email.trim(),n=nome.trim(),w=wapp.trim();
     if(!sb){msg('Sem conexão com o servidor.',true);return;}
+    if(!n){msg('Digite seu nome.',true);return;}
+    if(w.replace(/\D/g,'').length<10){msg('Digite um WhatsApp válido, com DDD.',true);return;}
     if(!e||!pass){msg('Digite e-mail e senha.',true);return;}
     if(pass.length<6){msg('A senha precisa de pelo menos 6 caracteres.',true);return;}
     if(pass!==pass2){msg('As senhas não são iguais.',true);return;}
     msg('Criando conta…');
-    sb.auth.signUp({email:e,password:pass,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
+    sb.auth.signUp({email:e,password:pass,options:{data:{name:n,whatsapp:w},emailRedirectTo:location.origin+location.pathname}}).then(function(r){
       if(r.error){msg(authErr(r.error.message),true);return;}
       if(r.data&&r.data.session){go();}
       else{mode='login';render();msg('Conta criada. Confirme o e-mail que enviamos e depois entre.');}
@@ -314,7 +326,7 @@ var ACT={
   }
 };
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act]');if(b&&ACT[b.dataset.act])ACT[b.dataset.act]();});
-document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.in;if(k==='email')email=e.target.value;else if(k==='pass')pass=e.target.value;else if(k==='pass2')pass2=e.target.value;else if(k==='new')newp=e.target.value;});
+document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.in;if(k==='email')email=e.target.value;else if(k==='pass')pass=e.target.value;else if(k==='pass2')pass2=e.target.value;else if(k==='nome')nome=e.target.value;else if(k==='wapp')wapp=e.target.value;else if(k==='new')newp=e.target.value;});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT'){ACT[{login:'login',signup:'signup',reset:'reset',recovery:'newpass'}[mode]]();}});
 if(!sb){render();}
 else{
