@@ -273,11 +273,8 @@ input[type=date]::-webkit-calendar-picker-indicator{opacity:.6}
 .srow .sn{font-family:var(--font-display); font-size:19px; font-weight:700; font-variant-numeric:tabular-nums}
 .chipw.neg{color:var(--neg)}
 .btn svg{width:20px; height:20px; flex:none}
-html,body{height:100%}
-body{position:fixed; inset:0; margin:0; display:flex; flex-direction:column; overflow:hidden; padding-top:env(safe-area-inset-top,0px); padding-left:max(24px,env(safe-area-inset-left,0px)); padding-right:max(24px,env(safe-area-inset-right,0px))}
-.top{position:static; flex:none; width:100%}
-main#view{flex:1; min-height:0; width:100%; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; padding:16px 0 28px}
-.nav{position:static; flex:none; margin:0 -24px; background:var(--bg); padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+body{padding-top:env(safe-area-inset-top,0px); min-height:calc(100vh + 2px); min-height:calc(100lvh + 2px)}
+main{padding-bottom:128px}
 .wz-item{display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--line)}
 .wz-item:first-child{border-top:0}
 .wz-item .wz-t{flex:1; min-width:0}
@@ -319,10 +316,10 @@ body.wizopen{overflow:hidden}
 .wz-cta:disabled{background:var(--surface2); color:var(--muted)}
 .wz-ok{width:84px; height:84px; border-radius:50%; background:var(--accent); color:var(--accent-fg); display:grid; place-items:center}
 .wz-ok svg{width:44px; height:44px}
-.nav{background:linear-gradient(to top,var(--bg) 62%,transparent); border-top:0; padding-top:10px; padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+.nav{background:linear-gradient(to top,var(--bg) 55%,transparent); border-top:0; padding-top:8px; padding-bottom:calc(6px + env(safe-area-inset-bottom,0px) * .45)}
 .nav>div{max-width:560px; margin:0 auto; display:flex; gap:10px; align-items:stretch}
 .nav .navtabs{flex:1; width:100%; max-width:none; margin:0; display:flex; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:24px; padding:4px 6px; box-shadow:0 6px 20px rgba(0,0,0,.2)}
-.nav .navtabs button{flex:1; min-width:0; min-height:54px}
+.nav .navtabs button{flex:1; min-width:0; min-height:50px}
 .nav .navtabs .navsell{flex:none; width:50px; height:50px; min-height:0; border-radius:50%; background:var(--accent); color:var(--accent-fg); padding:0; margin:0 4px; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .nav .navsell svg{width:26px; height:26px; stroke-width:2.4
 body.boot .top,body.boot main,body.boot .nav{visibility:hidden}
